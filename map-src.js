@@ -166,7 +166,7 @@ var mymap = L.map('mapid', {
     center: [start_latitude, start_longitude],
     zoom: start_zoom,
     layers: [currentBaseLayer],
-    contextmenu: true,
+    contextmenu: enableContextmenu,
     contextmenuWidth: 250,
     contextmenuItems: getContextmenuItemsForLayer(currentBaseLayer)
 });

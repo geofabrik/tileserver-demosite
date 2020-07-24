@@ -14,6 +14,8 @@ which is part of the [mod_tile](https://github.com/openstreetmap/mod_tile) Debia
 * Easy configurable for sysadmins: The list of layers can be configured during deployment. No
   NodeJS is required, you just need GNU Awk and Make.
 * Markers: You can add `&markers=9,49` to the hash part of the URL to add marker at 9°E, 49°N.
+* Context menu: The context menu of the map offers access to the URL of the tiles, to submit
+  tiles as dirty and to get details about the tile from mod_tile. The context menu can be disabled.
 
 ## Installation
 
