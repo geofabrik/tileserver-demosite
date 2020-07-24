@@ -111,6 +111,7 @@ function getContextmenuItemsForLayer(ll) {
 // set current layer, by default the layer with the local tiles
 var currentBaseLayer = baseLayers['local'] || baseLayers[Object.keys(baseLayers)[0]];
 var currentOverlays = [];
+var markerLocation = null;
 
 // tile grid
 L.GridLayer.GridDebug = L.GridLayer.extend({
@@ -141,14 +142,22 @@ if (anchor != "") {
         start_latitude = elements[2];
         start_longitude = elements[3];
     }
-    if (elementsF.length >= 2) {
-        var kv = elementsF[1].split("=");
+    for (var i = 1; i < elementsF.length; ++i) {
+        var kv = elementsF[i].split("=");
         if (kv.length == 2 && kv[0] == 'overlays') {
             decodeURIComponent(kv[1]).split(',').forEach(function (e) {
                 if (e in overlays) {
                     currentOverlays.push(overlays[e]);
                 }
             });
+        } else if (kv.length == 2 && kv[0] == 'marker') {
+            markerLocation = decodeURIComponent(kv[1]).split(',').map(parseFloat);
+            if (markerLocation.length != 2 || markerLocation[0] === NaN || markerLocation[1] === NaN) {
+                markerLocation = null;
+            } else {
+                // adapt order lon,lat to lat,lon for Leaflet
+                markerLocation.reverse();
+            }
         }
     }
 }
@@ -176,6 +185,10 @@ currentOverlays.forEach(function(ll) {
 var layerControl = L.control.layers(baseLayers, overlays);
 layerControl.addTo(mymap);
 
+// add marker if present
+if (markerLocation != null) {
+    L.marker(markerLocation).addTo(mymap);
+}
 
 // functions executed if the layer is changed or the map moved
 function update_url(newBaseLayerName) {
