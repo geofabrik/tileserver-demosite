@@ -125,7 +125,8 @@ L.GridLayer.GridDebug = L.GridLayer.extend({
 L.gridLayer.gridDebug = function (opts) {
     return new L.GridLayer.GridDebug(opts);
 };
-overlays['tile grid'] = L.gridLayer.gridDebug();
+var tileGrid = L.gridLayer.gridDebug();
+overlays['tile grid'] = tileGrid;
 
 // get layer and location from anchor part of the URL if there is any
 var anchor = location.hash.substr(1);
@@ -162,6 +163,9 @@ var mymap = L.map('mapid', {
 });
 currentOverlays.forEach(function(ll) {
     ll.addTo(mymap);
+    if (ll === tileGrid) {
+        return;
+    }
     var menuItems = getContextmenuItemsForLayer(ll);
     menuItems.forEach(function(item) {
         mymap.contextmenu.addItem(item);
