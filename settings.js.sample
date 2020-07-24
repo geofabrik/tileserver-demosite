@@ -18,4 +18,7 @@ var enableLayerSwitcher = true;
 
 /// Enable or disable contextmenu
 var enableContextmenu = true;
+
+/// Enable or disable "add marker" control
+var enableMarkerControl = true;
 // End of the variables which might be modified if deployed on a server

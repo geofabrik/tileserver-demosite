@@ -1,6 +1,11 @@
 "use strict";
 #include "settings.js"
 
+var mymap = null;
+var marker = null;
+var markerControl = null;
+var removeMarkerControl = null;
+
 var halfEarthCircumfence = Math.PI * 6378137;
 var tileSize = 256;
 function latlngToTile(coords, zoom) {
@@ -10,6 +15,11 @@ function latlngToTile(coords, zoom) {
     var x = ((coords.lng + 180) / 360) * n;
     var y = ((1 - Math.log(Math.tan(latRad) + (1 / Math.cos(latRad))) / Math.PI) / 2 * n);
     return {'x': Math.floor(x), 'y': Math.floor(y), 'z': zoom};
+}
+
+function round(number, decimals) {
+    var factor = Math.pow(10, decimals);
+    return Math.round(number * factor) / factor;
 }
 
 function requestAddQueue(e, ll) {
@@ -108,8 +118,83 @@ function getContextmenuItemsForLayer(ll) {
     ];
 }
 
+// marker control
+L.Control.MarkerIcon = L.Control.extend({
+    onAdd: function(map) {
+        var info = L.DomUtil.create('div');
+        info.style.backgroundImage = 'url("images/marker-icon.png")';
+        info.setAttribute('id', 'markerControl');
+        info.classList.add('marker-controls');
+        info.addEventListener('click', addMarkerAtCenter);
+        return info;
+    },
+
+    onRemove: function(map) {
+        // Nothing to do here
+    }
+});
+L.control.MarkerIcon = function(opts) {
+    return new L.Control.MarkerIcon(opts);
+}
+L.Control.RemoveMarkerIcon = L.Control.extend({
+    onAdd: function(map) {
+        var info = L.DomUtil.create('div');
+        info.style.backgroundImage = 'url("images/disable-marker-icon.png")';
+        info.setAttribute('id', 'markerControl');
+        info.classList.add('marker-controls');
+        info.addEventListener('click', removeMarkerFromMap);
+        return info;
+    },
+
+    onRemove: function(map) {
+        // Nothing to do here
+    }
+});
+L.control.RemoveMarkerIcon = function(opts) {
+    return new L.Control.RemoveMarkerIcon(opts);
+}
+
+function addMarkerControl() {
+    markerControl = L.control.MarkerIcon({position: 'topright'});
+    markerControl.addTo(mymap);
+}
+
+function addRemoveMarkerControl() {
+    removeMarkerControl = L.control.RemoveMarkerIcon({position: 'topright'});
+    removeMarkerControl.addTo(mymap);
+}
+
+function markerMoved(e) {
+    markerLocation = [e.latlng.lat, e.latlng.lng];
+    update_url('');
+}
+
+function addMarkerAtCenter() {
+    var center = mymap.getCenter();
+    marker = L.marker(center, {draggable: true});
+    marker.on('move', markerMoved);
+    marker.addTo(mymap);
+    markerLocation = [center.lat, center.lng];
+    markerControl.remove();
+    addRemoveMarkerControl();
+    update_url('');
+}
+
+function removeMarkerFromMap() {
+    marker.remove();
+    markerLocation = null;
+    update_url('');
+    removeMarkerControl.remove();
+    addMarkerControl();
+}
+
 // set current layer, by default the layer with the local tiles
-var currentBaseLayer = baseLayers['local'] || baseLayers[Object.keys(baseLayers)[0]];
+var currentBaseLayer = '';
+if (baseLayers.hasOwnProperty('local')) {
+    currentBaseLayer = baseLayers['local'];
+} else {
+    baseLayers[Object.keys(baseLayers)[0]];
+}
 var currentOverlays = [];
 var markerLocation = null;
 
@@ -162,7 +247,7 @@ if (anchor != "") {
     }
 }
 
-var mymap = L.map('mapid', {
+mymap = L.map('mapid', {
     center: [start_latitude, start_longitude],
     zoom: start_zoom,
     layers: [currentBaseLayer],
@@ -188,8 +273,13 @@ if (enableLayerSwitcher) {
 }
 
 // add marker if present
-if (markerLocation != null) {
-    L.marker(markerLocation).addTo(mymap);
+if (markerLocation != null && enableMarkerControl) {
+    marker = L.marker(markerLocation, {draggable: true});
+    marker.on('move', markerMoved);
+    marker.addTo(mymap);
+    addRemoveMarkerControl();
+} else if (enableMarkerControl) {
+    addMarkerControl();
 }
 
 // functions executed if the layer is changed or the map moved
@@ -214,7 +304,7 @@ function update_url(newBaseLayerName) {
         newurl += '&overlays=' + encodeURIComponent(overlayNames.join(','));
     }
     if (markerLocation != null && markerLocation.length == 2) {
-        newurl += '&marker=' + markerLocation[1] + ',' + markerLocation[0];
+        newurl += '&marker=' + round(markerLocation[1], 7) + ',' + round(markerLocation[0], 7);
     }
     history.replaceState('data to be passed', document.title, newurl);
 }
