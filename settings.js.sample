@@ -12,4 +12,7 @@ var baseLayers = {
 var overlays = {
     // add overlay styles here, similar to baseLayers
 };
+
+/// Enable or disable layer switcher
+var enableLayerSwitcher = true;
 // End of the variables which might be modified if deployed on a server

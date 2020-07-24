@@ -182,8 +182,10 @@ currentOverlays.forEach(function(ll) {
 });
 
 // layer control
-var layerControl = L.control.layers(baseLayers, overlays);
-layerControl.addTo(mymap);
+if (enableLayerSwitcher) {
+    var layerControl = L.control.layers(baseLayers, overlays);
+    layerControl.addTo(mymap);
+}
 
 // add marker if present
 if (markerLocation != null) {
