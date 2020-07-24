@@ -213,6 +213,9 @@ function update_url(newBaseLayerName) {
     if (overlayNames != '') {
         newurl += '&overlays=' + encodeURIComponent(overlayNames.join(','));
     }
+    if (markerLocation != null && markerLocation.length == 2) {
+        newurl += '&marker=' + markerLocation[1] + ',' + markerLocation[0];
+    }
     history.replaceState('data to be passed', document.title, newurl);
 }
 
