@@ -193,7 +193,7 @@ var currentBaseLayer = '';
 if (baseLayers.hasOwnProperty('local')) {
     currentBaseLayer = baseLayers['local'];
 } else {
-    baseLayers[Object.keys(baseLayers)[0]];
+    currentBaseLayer = baseLayers[Object.keys(baseLayers)[0]];
 }
 var currentOverlays = [];
 var markerLocation = null;
